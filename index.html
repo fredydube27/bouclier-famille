@@ -1495,9 +1495,14 @@
         <div class="wiz-field">
           <label>État de santé général</label>
           <div class="wiz-pills">
-            <div class="wiz-pill" data-val="excellente" onclick="selectPill(this,'sante')">💪 Excellente</div>
-            <div class="wiz-pill" data-val="bonne" onclick="selectPill(this,'sante')">😊 Bonne</div>
-            <div class="wiz-pill" data-val="conditions" onclick="selectPill(this,'sante')">⚠️ Conditions préexistantes</div>
+            <div class="wiz-pill" data-val="excellente" onclick="selectPill(this,'sante');document.getElementById('sante-detail-box').style.display='none';">💪 Excellente</div>
+            <div class="wiz-pill" data-val="bonne" onclick="selectPill(this,'sante');document.getElementById('sante-detail-box').style.display='none';">😊 Bonne</div>
+            <div class="wiz-pill" data-val="conditions" onclick="selectPill(this,'sante');document.getElementById('sante-detail-box').style.display='block';">⚠️ Conditions préexistantes</div>
+          </div>
+          <div id="sante-detail-box" style="display:none; margin-top:10px;">
+            <label style="font-size:.85rem; color:var(--gray); font-weight:600;">Spécifier <span style="font-weight:400;">(facultatif)</span></label>
+            <textarea id="f-sante-detail" rows="3" placeholder="Ex : diabète de type 2, hypertension, dépression légère…" oninput="ws.sante_detail=this.value"
+              style="width:100%;margin-top:6px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:inherit;font-size:.9rem;resize:vertical;color:var(--dark);background:#fff;"></textarea>
           </div>
           <div class="field-error" id="err-sante">Veuillez sélectionner votre état de santé</div>
         </div>
@@ -1671,7 +1676,7 @@ function selectOpt(el) {
 let wizStep = 1;
 const TOTAL = 5;
 const ws = { type:null, prenom:'', nom:'', age:40, sexe:null,
-             fumeur:null, sante:null, montant:null, duree:null,
+             fumeur:null, sante:null, sante_detail:'', montant:null, duree:null,
              email:'', telephone:'', ville:'' };
 
 // ── Pricing tables ────────────────────────────────────────────
@@ -1865,6 +1870,7 @@ function submitFormspree() {
       Sexe:             ws.sexe,
       Fumeur:           ws.fumeur === 'oui' ? 'Oui' : 'Non',
       Santé:            ws.sante,
+      'Détails santé':  ws.sante_detail || '—',
       'Type assurance': typeMap[ws.type] || ws.type,
       Couverture:       ws.montant ? fmt(ws.montant) : 'À déterminer',
       Durée:            ws.duree ? durMap[ws.duree] : (ws.type === 'permanent' ? 'T100' : 'À déterminer'),
