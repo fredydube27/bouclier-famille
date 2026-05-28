@@ -1496,11 +1496,6 @@
           <div class="field-error" id="err-duree">Veuillez choisir une durée</div>
         </div>
 
-        <div id="step3-preview">
-          <div style="font-size:.8rem;color:var(--gray);font-weight:600;margin-bottom:3px;">Estimation préliminaire</div>
-          <div id="preview-amount" style="font-size:2rem;font-weight:900;color:var(--blue);line-height:1;">—</div>
-          <div style="font-size:.77rem;color:var(--gray);">/ mois · Approximatif, selon votre profil</div>
-        </div>
       </div>
 
       <!-- STEP 4 : COORDONNÉES -->
@@ -1569,12 +1564,6 @@
             <div style="font-size:.88rem;opacity:.85;">Généralement dans les prochaines heures ouvrables</div>
           </div>
 
-          <div class="prime-card" id="prime-card" style="margin:16px 0;">
-            <div class="prime-label">Estimation de votre prime mensuelle</div>
-            <div class="prime-amount" id="prime-amount">—</div>
-            <div class="prime-period">/ mois</div>
-            <div class="prime-detail" id="prime-detail"></div>
-          </div>
 
           <div style="background:#f8fafc;border-radius:10px;padding:16px;text-align:left;margin-bottom:18px;">
             <div style="font-size:.82rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Prochaines étapes</div>
@@ -1845,7 +1834,6 @@ function submitFormspree() {
       'Type assurance': typeMap[ws.type] || ws.type,
       Couverture:       ws.montant ? fmt(ws.montant) : 'À déterminer',
       Durée:            ws.duree ? durMap[ws.duree] : (ws.type === 'permanent' ? 'T100' : 'À déterminer'),
-      'Prime estimée':  p ? p+' $/mois' : 'À calculer',
     })
   }).catch(() => {});
 }
@@ -1906,25 +1894,8 @@ function validateStep(n) {
 
 // ── Build result ──────────────────────────────────────────────
 function buildResult() {
-  const {prenom, type, montant, duree, age} = ws;
+  const {prenom} = ws;
   document.getElementById('result-title').textContent = `Merci ${prenom} !`;
-  const fmt = v => v >= 1000000 ? '1 000 000 $' : ((v/1000).toFixed(0) + ' 000 $');
-  const durMap = {t10:'10 ans',t15:'15 ans',t20:'20 ans',t25:'25 ans'};
-  let detail = '';
-  if (type === 'temporaire' && duree) detail = `Temporaire ${durMap[duree]} · ${fmt(montant)} · ${age} ans`;
-  else if (type === 'permanent')      detail = `Permanente T100 · ${fmt(montant)} · ${age} ans`;
-  else                                detail = 'Votre conseiller vous aidera à choisir le produit idéal.';
-  const p = calcPremium();
-  const pc = document.getElementById('prime-card');
-  if (p && p > 0) {
-    document.getElementById('prime-amount').textContent = p + ' $';
-    document.getElementById('prime-detail').textContent = detail + ' · Estimation approximative, à confirmer avec votre conseiller.';
-    pc.style.display = 'block';
-  } else {
-    pc.style.display = 'none';
-    document.getElementById('result-sub').textContent =
-      'Votre conseiller vous aidera à trouver le plan idéal et vous contactera sous 24h ouvrables.';
-  }
 }
 
 // ── Format téléphone ──────────────────────────────────────────
