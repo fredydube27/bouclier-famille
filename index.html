@@ -107,19 +107,19 @@
 
     /* ─── HERO ─── */
     .hero {
-      background: var(--white);
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
       padding: 80px 5% 72px;
       text-align: center;
-      color: var(--dark);
-      border-bottom: 1px solid var(--border);
+      color: var(--white);
+      border-bottom: none;
     }
     .hero-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: var(--blue-lt);
-      border: 1px solid #bfdbfe;
-      color: var(--blue);
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.22);
+      color: rgba(255,255,255,.9);
       border-radius: 6px;
       padding: 5px 14px;
       font-size: .78rem;
@@ -133,13 +133,13 @@
       line-height: 1.12;
       max-width: 760px;
       margin: 0 auto 16px;
-      color: var(--dark);
+      color: var(--white);
       letter-spacing: -.025em;
     }
-    .hero h1 .highlight { color: var(--blue); -webkit-text-fill-color: var(--blue); }
+    .hero h1 .highlight { color: #93c5fd; -webkit-text-fill-color: #93c5fd; }
     .hero-sub {
       font-size: 1.05rem;
-      color: var(--gray);
+      color: rgba(255,255,255,.75);
       max-width: 520px;
       margin: 0 auto 28px;
       line-height: 1.7;
@@ -147,22 +147,34 @@
     }
     .hero-cta-btn {
       display: inline-block;
-      background: var(--blue);
-      color: var(--white);
+      background: #fff;
+      color: var(--blue);
       font-size: .97rem;
-      font-weight: 600;
-      padding: 12px 26px;
+      font-weight: 700;
+      padding: 14px 30px;
       border-radius: var(--radius);
       cursor: pointer;
       border: none;
       font-family: inherit;
-      margin-bottom: 36px;
-      box-shadow: 0 1px 2px rgba(0,0,0,.1), 0 4px 12px rgba(37,99,235,.22);
+      margin-bottom: 18px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.25);
       transition: background .15s, transform .15s;
       text-decoration: none;
       letter-spacing: -.01em;
     }
-    .hero-cta-btn:hover { background: var(--blue-dk); transform: translateY(-1px); }
+    .hero-cta-btn:hover { background: #eff6ff; transform: translateY(-2px); }
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 6px 14px;
+      color: rgba(255,255,255,.6);
+      font-size: .83rem;
+      font-weight: 500;
+      margin-bottom: 36px;
+    }
+    .hero-stats .hsdot { opacity: .35; }
 
     /* quiz card */
     .quiz-card {
@@ -926,6 +938,14 @@
 
   <button class="hero-cta-btn" onclick="openWizard()">Obtenir mon devis gratuit — 60 secondes</button>
 
+  <div class="hero-stats">
+    <span>⚡ Moins de 60 secondes</span>
+    <span class="hsdot">·</span>
+    <span>🔒 Sans engagement</span>
+    <span class="hsdot">·</span>
+    <span>🇨🇦 Conseillers québécois</span>
+  </div>
+
   <div class="quiz-card" id="devis">
     <h3>Quel est votre principal besoin de protection ?</h3>
     <div class="quiz-options">
@@ -1118,15 +1138,6 @@
   </div>
 </div>
 
-<!-- SOCIAL PROOF -->
-<section class="social-proof">
-  <div class="proof-numbers">
-    <div class="proof-num">
-      <div class="num">&lt;60s</div>
-      <div class="lbl">Pour obtenir un devis</div>
-    </div>
-  </div>
-</section>
 
 <!-- HONEST SECTION -->
 <section style="padding: 70px 5%;">
