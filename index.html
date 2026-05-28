@@ -811,6 +811,7 @@
     input[type=range] { width:100%; accent-color:var(--blue); cursor:pointer; margin-top:4px; }
     .field-error { font-size:.76rem; color:var(--red); margin-top:4px; display:none; }
     .field-error.show { display:block; }
+    .wiz-field input.input-error, .wiz-field select.input-error { border-color:#ef4444 !important; background:#fff5f5; }
     .wiz-footer {
       padding:14px 22px 22px; display:flex; gap:11px; align-items:center;
       position:sticky; bottom:0; background:var(--white);
@@ -1913,9 +1914,22 @@ function validateStep(n) {
   }
   if (n === 4) {
     const eRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!eRe.test(ws.email))                             { setErr('err-email',true); ok=false; } else setErr('err-email',false);
-    if (ws.telephone.replace(/\D/g,'').length < 10)      { setErr('err-tel',true);   ok=false; } else setErr('err-tel',false);
-    if (!ws.ville)                                        { setErr('err-ville',true); ok=false; } else setErr('err-ville',false);
+    const emailEl = document.getElementById('f-email');
+    const telEl   = document.getElementById('f-tel');
+    const villeEl = document.getElementById('f-ville');
+    if (!eRe.test(ws.email)) {
+      setErr('err-email',true); emailEl.classList.add('input-error'); ok=false;
+    } else { setErr('err-email',false); emailEl.classList.remove('input-error'); }
+    if (ws.telephone.replace(/\D/g,'').length < 10) {
+      setErr('err-tel',true); telEl.classList.add('input-error'); ok=false;
+    } else { setErr('err-tel',false); telEl.classList.remove('input-error'); }
+    if (!ws.ville) {
+      setErr('err-ville',true); villeEl.classList.add('input-error'); ok=false;
+    } else { setErr('err-ville',false); villeEl.classList.remove('input-error'); }
+    if (!ok) {
+      const first = document.querySelector('#wiz-step-4 .input-error');
+      if (first) first.scrollIntoView({behavior:'smooth', block:'center'});
+    }
   }
   return ok;
 }
