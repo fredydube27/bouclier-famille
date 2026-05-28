@@ -1574,33 +1574,40 @@
         </div>
       </div>
 
-      <!-- STEP 5 : RÉSULTAT -->
+      <!-- STEP 5 : CONFIRMATION -->
       <div class="wiz-step" id="wiz-step-5">
-        <div class="wiz-result">
-          <div class="wiz-success-icon">✅</div>
-          <h3 id="result-title">Demande envoyée !</h3>
-          <p class="result-sub" id="result-sub">Votre conseiller Bouclier Famille vous contactera sous 24h ouvrables.</p>
+        <div style="text-align:center; padding: 10px 0 20px;">
 
-          <div class="prime-card" id="prime-card">
+          <div style="width:80px;height:80px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:2.4rem;">✅</div>
+
+          <h3 id="result-title" style="font-size:1.45rem;font-weight:900;color:var(--dark);margin-bottom:10px;">Demande reçue !</h3>
+
+          <div style="background:var(--blue);color:#fff;border-radius:12px;padding:22px 20px;margin:18px 0;">
+            <div style="font-size:2rem;margin-bottom:8px;">📞</div>
+            <div style="font-size:1.2rem;font-weight:900;line-height:1.3;margin-bottom:6px;">Un conseiller vous appellera<br>le plus rapidement possible</div>
+            <div style="font-size:.88rem;opacity:.85;">Généralement dans les prochaines heures ouvrables</div>
+          </div>
+
+          <div class="prime-card" id="prime-card" style="margin:16px 0;">
             <div class="prime-label">Estimation de votre prime mensuelle</div>
             <div class="prime-amount" id="prime-amount">—</div>
             <div class="prime-period">/ mois</div>
             <div class="prime-detail" id="prime-detail"></div>
           </div>
 
-          <div class="wiz-next-steps">
-            <h4>🗓️ Prochaines étapes</h4>
-            <ul>
-              <li>Votre conseiller vous appelle sous 24h ouvrables</li>
-              <li>Il vous présente un plan clair adapté à votre budget</li>
-              <li>Aucun engagement, aucune pression de vente</li>
-              <li>Votre protection peut être activée en quelques jours</li>
-            </ul>
+          <div style="background:#f8fafc;border-radius:10px;padding:16px;text-align:left;margin-bottom:18px;">
+            <div style="font-size:.82rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Prochaines étapes</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;gap:10px;align-items:flex-start;font-size:.9rem;"><span style="color:var(--green);font-weight:700;">✓</span> Votre conseiller vous appelle rapidement</div>
+              <div style="display:flex;gap:10px;align-items:flex-start;font-size:.9rem;"><span style="color:var(--green);font-weight:700;">✓</span> Plan clair adapté à votre budget</div>
+              <div style="display:flex;gap:10px;align-items:flex-start;font-size:.9rem;"><span style="color:var(--green);font-weight:700;">✓</span> Aucun engagement, aucune pression</div>
+              <div style="display:flex;gap:10px;align-items:flex-start;font-size:.9rem;"><span style="color:var(--green);font-weight:700;">✓</span> Protection activée en quelques jours</div>
+            </div>
           </div>
 
           <button onclick="closeWizard()"
-            style="width:100%;margin-top:16px;background:linear-gradient(135deg,var(--blue),var(--teal));color:white;border:none;border-radius:50px;padding:14px;font-size:.98rem;font-weight:800;cursor:pointer;font-family:inherit;">
-            Fermer ✕
+            style="width:100%;background:var(--blue);color:white;border:none;border-radius:8px;padding:14px;font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit;">
+            Fermer
           </button>
         </div>
       </div>
@@ -1825,11 +1832,40 @@ function selectPill(el, field) {
 // ── Navigation ────────────────────────────────────────────────
 function wizNext() {
   if (!validateStep(wizStep)) return;
-  if (wizStep === TOTAL-1) buildResult();
+  if (wizStep === TOTAL-1) {
+    buildResult();
+    submitFormspree();
+  }
   if (wizStep < TOTAL) {
     showStep(wizStep + 1);
     document.querySelector('.wiz-modal').scrollTop = 0;
   }
+}
+
+function submitFormspree() {
+  const durMap = {t10:'10 ans',t15:'15 ans',t20:'20 ans',t25:'25 ans'};
+  const fmt = v => v >= 1000000 ? '1 000 000 $' : ((v/1000).toFixed(0)+' 000 $');
+  const typeMap = {temporaire:'Temporaire', permanent:'Permanente T100', unknown:'À déterminer'};
+  const p = calcPremium();
+  fetch('https://formspree.io/f/xnjrlrvg', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      Prénom:           ws.prenom,
+      Nom:              ws.nom,
+      Courriel:         ws.email,
+      Téléphone:        ws.telephone,
+      Région:           ws.ville,
+      Âge:              ws.age,
+      Sexe:             ws.sexe,
+      Fumeur:           ws.fumeur === 'oui' ? 'Oui' : 'Non',
+      Santé:            ws.sante,
+      'Type assurance': typeMap[ws.type] || ws.type,
+      Couverture:       ws.montant ? fmt(ws.montant) : 'À déterminer',
+      Durée:            ws.duree ? durMap[ws.duree] : (ws.type === 'permanent' ? 'T100' : 'À déterminer'),
+      'Prime estimée':  p ? p+' $/mois' : 'À calculer',
+    })
+  }).catch(() => {});
 }
 function wizPrev() {
   if (wizStep > 1) {
