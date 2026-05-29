@@ -1497,9 +1497,10 @@
         </div>
 
         <div id="step3-preview">
-          <div style="font-size:.8rem;color:var(--gray);font-weight:600;margin-bottom:3px;">Estimation préliminaire</div>
+          <div style="font-size:.8rem;color:var(--gray);font-weight:600;margin-bottom:3px;">Fourchette de prix mensuelle</div>
           <div id="preview-amount" style="font-size:2rem;font-weight:900;color:var(--blue);line-height:1;">—</div>
-          <div style="font-size:.77rem;color:var(--gray);">/ mois · Approximatif, selon votre profil</div>
+          <div style="font-size:.77rem;color:var(--gray);margin-top:4px;">/ mois</div>
+          <div style="font-size:.72rem;color:var(--gray);margin-top:8px;line-height:1.5;font-style:italic;">⚠️ Les prix peuvent varier selon l'assureur, votre état de santé et votre profil. Fourchettes en date de mai 2026.</div>
         </div>
 
       </div>
@@ -1653,54 +1654,82 @@ const ws = { type:null, prenom:'', nom:'', age:40, sexe:null,
              email:'', telephone:'', ville:'' };
 
 // ── Pricing tables ────────────────────────────────────────────
-// Temporaire : base 250 000 $, homme, non-fumeur parfaite santé
+// Temporaire : fourchettes réelles mai 2026
+// c1 = 100k-249k, c2 = 250k-499k, c3 = 500k+
+// Clés d'âge : 22=18-25ans, 30=26-35ans, 40=36-45ans, 50=46-55ans, 60=56-65ans
 const TR = {
-  25:{t10:14,t15:17,t20:21,t25:28},
-  30:{t10:16,t15:20,t20:25,t25:34},
-  35:{t10:21,t15:27,t20:33,t25:45},
-  40:{t10:29,t15:36,t20:46,t25:63},
-  45:{t10:38,t15:46,t20:57,t25:79},
-  50:{t10:50,t15:55,t20:68,t25:94},
-  55:{t10:68,t15:83,t20:105,t25:146},
-  60:{t10:97,t15:119,t20:153,t25:null},
-  65:{t10:149,t15:186,t20:null,t25:null},
-  70:{t10:231,t15:null,t20:null,t25:null}
+  t10:{
+    22:{c1:{min:10,max:12},c2:{min:13,max:15},c3:{min:22,max:25}},
+    30:{c1:{min:10,max:12},c2:{min:12,max:16},c3:{min:21,max:26}},
+    40:{c1:{min:10,max:15},c2:{min:15,max:28},c3:{min:22,max:44}},
+    50:{c1:{min:15,max:32},c2:{min:25,max:63},c3:{min:44,max:107}},
+    60:{c1:{min:31,max:81},c2:{min:70,max:190},c3:{min:107,max:336}}
+  },
+  t15:{
+    22:{c1:{min:10,max:12},c2:{min:16,max:18},c3:{min:25,max:28}},
+    30:{c1:{min:10,max:12},c2:{min:16,max:19},c3:{min:26,max:29}},
+    40:{c1:{min:12,max:20},c2:{min:19,max:39},c3:{min:27,max:63}},
+    50:{c1:{min:20,max:47},c2:{min:38,max:98},c3:{min:60,max:160}},
+    60:{c1:{min:48,max:122},c2:{min:107,max:278},c3:{min:162,max:520}}
+  },
+  t20:{
+    22:{c1:{min:10,max:13},c2:{min:16,max:20},c3:{min:27,max:34}},
+    30:{c1:{min:10,max:13},c2:{min:16,max:22},c3:{min:28,max:36}},
+    40:{c1:{min:12,max:25},c2:{min:20,max:44},c3:{min:33,max:73}},
+    50:{c1:{min:23,max:58},c2:{min:45,max:120},c3:{min:77,max:212}},
+    60:{c1:{min:62,max:175},c2:{min:137,max:367},c3:{min:217,max:658}}
+  },
+  t25:{
+    22:{c1:{min:11,max:14},c2:{min:19,max:23},c3:{min:29,max:38}},
+    30:{c1:{min:12,max:13},c2:{min:20,max:28},c3:{min:34,max:49}},
+    40:{c1:{min:15,max:32},c2:{min:28,max:60},c3:{min:46,max:107}},
+    50:{c1:{min:30,max:80},c2:{min:63,max:156},c3:{min:110,max:292}},
+    60:{c1:{min:82,max:125},c2:{min:167,max:260},c3:{min:296,max:488}}
+  }
 };
 // T100 : base 50 000 $, homme, non-fumeur parfaite santé
 const PR = {25:27,30:33,35:40,40:50,45:62,50:75,55:95,60:125,65:165,70:220};
 
-function interp(tbl, age) {
-  const ages = Object.keys(tbl).map(Number).sort((a,b) => a-b);
+function interpPR(age) {
+  const ages = Object.keys(PR).map(Number).sort((a,b)=>a-b);
   const c = Math.max(ages[0], Math.min(ages[ages.length-1], age));
-  let lo = ages[0], hi = ages[ages.length-1];
-  for (let i = 0; i < ages.length-1; i++) {
-    if (ages[i] <= c && ages[i+1] >= c) { lo = ages[i]; hi = ages[i+1]; break; }
-  }
-  if (lo === hi) return tbl[lo];
-  const t = (c-lo)/(hi-lo), lv = tbl[lo], uv = tbl[hi];
-  if (typeof lv === 'number') return lv + t*(uv-lv);
-  const r = {};
-  for (const k of Object.keys(lv))
-    r[k] = (lv[k]===null || uv[k]===null) ? null : lv[k] + t*(uv[k]-lv[k]);
-  return r;
+  let lo=ages[0], hi=ages[ages.length-1];
+  for(let i=0;i<ages.length-1;i++){if(ages[i]<=c&&ages[i+1]>=c){lo=ages[i];hi=ages[i+1];break;}}
+  if(lo===hi) return PR[lo];
+  return PR[lo]+(c-lo)/(hi-lo)*(PR[hi]-PR[lo]);
+}
+
+function getAgeKey(age) {
+  if (age <= 25) return 22;
+  if (age <= 35) return 30;
+  if (age <= 45) return 40;
+  if (age <= 55) return 50;
+  return 60;
+}
+
+function getCovTier(montant) {
+  if (montant === 175000) return 'c1';
+  if (montant === 375000) return 'c2';
+  return 'c3';
+}
+
+function calcPriceRange() {
+  const {age, montant, duree} = ws;
+  if (!montant || !duree) return null;
+  const ageKey = getAgeKey(age);
+  const tier = getCovTier(montant);
+  const row = TR[duree] && TR[duree][ageKey];
+  if (!row) return null;
+  return row[tier];
 }
 
 function calcPremium() {
-  const {type, age, sexe, fumeur, sante, montant, duree} = ws;
-  if (!montant || !age) return null;
-  let base = 0;
-  if (type === 'temporaire') {
-    if (!duree) return null;
-    const r = interp(TR, age);
-    base = r[duree];
-    if (base === null) return null;
-    base = base * (montant / 250000);
-  } else if (type === 'permanent') {
-    base = interp(PR, age) * (montant / 50000);
-  } else return null;
-  if (sexe === 'femme')    base *= 0.80;
-  if (fumeur === 'true')   base *= 1.85;
-  if (sante === 'conditions') base *= 1.30;
+  const {type, age, sexe, fumeur, sante, montant} = ws;
+  if (type !== 'permanent' || !montant || !age) return null;
+  let base = interpPR(age) * (montant / 50000);
+  if (sexe === 'femme')         base *= 0.80;
+  if (fumeur === 'true')        base *= 1.85;
+  if (sante === 'conditions')   base *= 1.30;
   return Math.round(base);
 }
 
@@ -1793,13 +1822,20 @@ function setupStep3() {
 }
 
 function updatePreview() {
-  const p = calcPremium();
   const prev = document.getElementById('step3-preview');
-  if (p && p > 0) {
-    document.getElementById('preview-amount').textContent = p + ' $';
-    prev.style.display = 'block';
+  const amountEl = document.getElementById('preview-amount');
+  if (ws.type === 'temporaire') {
+    const r = calcPriceRange();
+    if (r) {
+      amountEl.textContent = r.min + '$ – ' + r.max + '$';
+      prev.style.display = 'block';
+    } else { prev.style.display = 'none'; }
   } else {
-    prev.style.display = 'none';
+    const p = calcPremium();
+    if (p && p > 0) {
+      amountEl.textContent = p + ' $';
+      prev.style.display = 'block';
+    } else { prev.style.display = 'none'; }
   }
 }
 
@@ -1850,7 +1886,7 @@ function submitFormspree() {
       'Type assurance': typeMap[ws.type] || ws.type,
       Couverture:       ws.montant_label || (ws.montant ? fmt(ws.montant) : 'À déterminer'),
       Durée:            ws.duree ? durMap[ws.duree] : (ws.type === 'permanent' ? 'T100' : 'À déterminer'),
-      'Prime estimée':  p ? p+' $/mois' : 'À calculer',
+      'Prime estimée':  ws.type==='temporaire' ? (()=>{const r=calcPriceRange(); return r ? r.min+'$–'+r.max+'$/mois' : 'À calculer';})() : (p ? p+' $/mois' : 'À calculer'),
     })
   }).catch(() => {});
 }
@@ -1911,23 +1947,27 @@ function validateStep(n) {
 
 // ── Build result ──────────────────────────────────────────────
 function buildResult() {
-  const {prenom, type, montant, duree, age} = ws;
+  const {prenom, type, montant_label, duree} = ws;
   document.getElementById('result-title').textContent = `Merci ${prenom} !`;
-  const fmt = v => v >= 1000000 ? '1 000 000 $' : ((v/1000).toFixed(0) + ' 000 $');
   const durMap = {t10:'10 ans',t15:'15 ans',t20:'20 ans',t25:'25 ans'};
-  let detail = '';
-  if (type === 'temporaire' && duree) detail = `Temporaire ${durMap[duree]} · ${fmt(montant)} · ${age} ans`;
-  else if (type === 'permanent')      detail = `Permanente T100 · ${fmt(montant)} · ${age} ans`;
-  else                                detail = 'Votre conseiller vous aidera à choisir le produit idéal.';
-  const p = calcPremium();
   const pc = document.getElementById('prime-card');
-  if (p && p > 0) {
-    document.getElementById('prime-amount').textContent = p + ' $';
-    document.getElementById('prime-detail').textContent = detail + ' · Estimation approximative, à confirmer avec votre conseiller.';
-    pc.style.display = 'block';
-  } else {
-    pc.style.display = 'none';
-  }
+  if (type === 'temporaire') {
+    const r = calcPriceRange();
+    if (r) {
+      document.getElementById('prime-amount').textContent = r.min + '$ – ' + r.max + '$';
+      document.getElementById('prime-detail').textContent =
+        (montant_label || '') + (duree ? ' · ' + durMap[duree] : '') +
+        ' · Estimation selon les assureurs partenaires, mai 2026.';
+      pc.style.display = 'block';
+    } else { pc.style.display = 'none'; }
+  } else if (type === 'permanent') {
+    const p = calcPremium();
+    if (p && p > 0) {
+      document.getElementById('prime-amount').textContent = p + ' $';
+      document.getElementById('prime-detail').textContent = 'Estimation approximative · À confirmer avec votre conseiller.';
+      pc.style.display = 'block';
+    } else { pc.style.display = 'none'; }
+  } else { pc.style.display = 'none'; }
 }
 
 // ── Format téléphone ──────────────────────────────────────────
