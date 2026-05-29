@@ -1656,14 +1656,18 @@ const ws = { type:null, prenom:'', nom:'', age:40, sexe:null,
 // ── Pricing tables ────────────────────────────────────────────
 // Temporaire : fourchettes réelles mai 2026
 // c1 = 100k-249k, c2 = 250k-499k, c3 = 500k+
-// Clés d'âge : 22=18-25ans, 30=26-35ans, 40=36-45ans, 50=46-55ans, 60=56-65ans
+// Clés d'âge : 22=18-25, 30=26-35, 40=36-45, 50=46-55, 60=56-65, 75=66-75
 const TR = {
+  t5:{
+    75:{c1:{min:254,max:254},c2:{min:538,max:538},c3:{min:824,max:824}}
+  },
   t10:{
     22:{c1:{min:10,max:12},c2:{min:13,max:15},c3:{min:22,max:25}},
     30:{c1:{min:10,max:12},c2:{min:12,max:16},c3:{min:21,max:26}},
     40:{c1:{min:10,max:15},c2:{min:15,max:28},c3:{min:22,max:44}},
     50:{c1:{min:15,max:32},c2:{min:25,max:63},c3:{min:44,max:107}},
-    60:{c1:{min:31,max:81},c2:{min:70,max:190},c3:{min:107,max:336}}
+    60:{c1:{min:31,max:81},c2:{min:70,max:190},c3:{min:107,max:336}},
+    75:{c1:{min:267,max:267},c2:{min:567,max:650},c3:{min:867,max:1270}}
   },
   t15:{
     22:{c1:{min:10,max:12},c2:{min:16,max:18},c3:{min:25,max:28}},
@@ -1704,7 +1708,8 @@ function getAgeKey(age) {
   if (age <= 35) return 30;
   if (age <= 45) return 40;
   if (age <= 55) return 50;
-  return 60;
+  if (age <= 65) return 60;
+  return 75;
 }
 
 function getCovTier(montant) {
@@ -1805,7 +1810,7 @@ function setupStep3() {
   const dPills = document.getElementById('duree-pills');
   if (type === 'temporaire') {
     dSec.style.display = 'block'; dPills.innerHTML = '';
-    [{v:'t10',l:'10 ans'},{v:'t15',l:'15 ans'},{v:'t20',l:'20 ans'},{v:'t25',l:'25 ans'}].forEach(d => {
+    [{v:'t5',l:'5 ans'},{v:'t10',l:'10 ans'},{v:'t15',l:'15 ans'},{v:'t20',l:'20 ans'},{v:'t25',l:'25 ans'}].forEach(d => {
       const el = document.createElement('div');
       el.className = 'wiz-pill' + (ws.duree === d.v ? ' selected' : '');
       el.dataset.val = d.v; el.textContent = d.l;
@@ -1865,7 +1870,7 @@ function wizNext() {
 }
 
 function submitFormspree() {
-  const durMap = {t10:'10 ans',t15:'15 ans',t20:'20 ans',t25:'25 ans'};
+  const durMap = {t5:'5 ans',t10:'10 ans',t15:'15 ans',t20:'20 ans',t25:'25 ans'};
   const fmt = v => v >= 1000000 ? '1 000 000 $' : ((v/1000).toFixed(0)+' 000 $');
   const typeMap = {temporaire:'Temporaire', permanent:'Permanente T100', unknown:'À déterminer'};
   const p = calcPremium();
@@ -1949,7 +1954,7 @@ function validateStep(n) {
 function buildResult() {
   const {prenom, type, montant_label, duree} = ws;
   document.getElementById('result-title').textContent = `Merci ${prenom} !`;
-  const durMap = {t10:'10 ans',t15:'15 ans',t20:'20 ans',t25:'25 ans'};
+  const durMap = {t5:'5 ans',t10:'10 ans',t15:'15 ans',t20:'20 ans',t25:'25 ans'};
   const pc = document.getElementById('prime-card');
   if (type === 'temporaire') {
     const r = calcPriceRange();
