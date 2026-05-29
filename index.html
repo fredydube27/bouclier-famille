@@ -1692,6 +1692,42 @@ const TR = {
     60:{c1:{min:82,max:125},c2:{min:167,max:260},c3:{min:296,max:488}}
   }
 };
+// Temporaire FEMME : fourchettes réelles mai 2026, non-fumeur bonne santé
+const TRF = {
+  t5:{
+    70:{c1:{min:60,max:174}, c2:{min:138,max:400},c3:{min:226,max:758}}
+  },
+  t10:{
+    22:{c1:{min:7,max:10},  c2:{min:10,max:13}, c3:{min:14,max:16}},
+    30:{c1:{min:8,max:12},  c2:{min:10,max:13}, c3:{min:14,max:18}},
+    40:{c1:{min:9,max:13},  c2:{min:11,max:20}, c3:{min:15,max:31}},
+    50:{c1:{min:12,max:25}, c2:{min:18,max:47}, c3:{min:30,max:80}},
+    60:{c1:{min:25,max:60}, c2:{min:51,max:126},c3:{min:77,max:233}},
+    70:{c1:{min:60,max:208},c2:{min:132,max:476},c3:{min:238,max:830}}
+  },
+  t15:{
+    22:{c1:{min:8,max:12},  c2:{min:12,max:14}, c3:{min:17,max:21}},
+    30:{c1:{min:9,max:12},  c2:{min:12,max:15}, c3:{min:18,max:23}},
+    40:{c1:{min:10,max:16}, c2:{min:14,max:27}, c3:{min:20,max:45}},
+    50:{c1:{min:16,max:35}, c2:{min:27,max:74}, c3:{min:43,max:114}},
+    60:{c1:{min:35,max:88}, c2:{min:75,max:188},c3:{min:115,max:340}},
+    70:{c1:{min:90,max:133},c2:{min:188,max:297},c3:{min:333,max:544}}
+  },
+  t20:{
+    22:{c1:{min:9,max:12},  c2:{min:13,max:15}, c3:{min:19,max:25}},
+    30:{c1:{min:9,max:12},  c2:{min:13,max:17}, c3:{min:20,max:25}},
+    40:{c1:{min:10,max:17}, c2:{min:15,max:30}, c3:{min:24,max:55}},
+    50:{c1:{min:18,max:43}, c2:{min:32,max:86}, c3:{min:55,max:155}},
+    60:{c1:{min:44,max:122},c2:{min:94,max:250},c3:{min:163,max:463}}
+  },
+  t25:{
+    22:{c1:{min:10,max:12}, c2:{min:14,max:17}, c3:{min:22,max:27}},
+    30:{c1:{min:10,max:14}, c2:{min:15,max:23}, c3:{min:24,max:36}},
+    40:{c1:{min:12,max:22}, c2:{min:21,max:45}, c3:{min:35,max:78}},
+    50:{c1:{min:22,max:55}, c2:{min:47,max:112},c3:{min:81,max:207}},
+    60:{c1:{min:57,max:90}, c2:{min:123,max:205},c3:{min:216,max:350}}
+  }
+};
 // T100 : base 50 000 $, homme, non-fumeur parfaite santé
 const PR = {25:27,30:33,35:40,40:50,45:62,50:75,55:95,60:125,65:165,70:220};
 
@@ -1720,11 +1756,12 @@ function getCovTier(montant) {
 }
 
 function calcPriceRange() {
-  const {age, montant, duree} = ws;
+  const {age, montant, duree, sexe} = ws;
   if (!montant || !duree) return null;
   const ageKey = getAgeKey(age);
   const tier = getCovTier(montant);
-  const row = TR[duree] && TR[duree][ageKey];
+  const table = sexe === 'femme' ? TRF : TR;
+  const row = table[duree] && table[duree][ageKey];
   if (!row) return null;
   return row[tier];
 }
