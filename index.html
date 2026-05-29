@@ -1809,8 +1809,11 @@ function setupStep3() {
   const dSec = document.getElementById('duree-section');
   const dPills = document.getElementById('duree-pills');
   if (type === 'temporaire') {
+    const availableTerms = getAvailableTerms(ws.age);
+    // Réinitialise duree si plus disponible
+    if (ws.duree && !availableTerms.find(t => t.v === ws.duree)) ws.duree = null;
     dSec.style.display = 'block'; dPills.innerHTML = '';
-    [{v:'t5',l:'5 ans'},{v:'t10',l:'10 ans'},{v:'t15',l:'15 ans'},{v:'t20',l:'20 ans'},{v:'t25',l:'25 ans'}].forEach(d => {
+    availableTerms.forEach(d => {
       const el = document.createElement('div');
       el.className = 'wiz-pill' + (ws.duree === d.v ? ' selected' : '');
       el.dataset.val = d.v; el.textContent = d.l;
@@ -1824,6 +1827,13 @@ function setupStep3() {
     dSec.style.display = 'none'; ws.duree = null;
   }
   updatePreview();
+}
+
+function getAvailableTerms(age) {
+  if (age >= 75) return [{v:'t5',l:'5 ans'},{v:'t10',l:'10 ans'}];
+  if (age >= 70) return [{v:'t10',l:'10 ans'},{v:'t15',l:'15 ans'}];
+  if (age >= 65) return [{v:'t10',l:'10 ans'},{v:'t15',l:'15 ans'},{v:'t20',l:'20 ans'}];
+  return [{v:'t10',l:'10 ans'},{v:'t15',l:'15 ans'},{v:'t20',l:'20 ans'},{v:'t25',l:'25 ans'}];
 }
 
 function updatePreview() {
