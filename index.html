@@ -1873,7 +1873,7 @@ function setupStep3() {
 function getAvailableTerms(age) {
   if (age >= 71) return [{v:'t5',l:'5 ans'},{v:'t10',l:'10 ans'}];
   if (age === 70) return [{v:'t5',l:'5 ans'},{v:'t10',l:'10 ans'},{v:'t15',l:'15 ans'}];
-  if (age >= 65) return [{v:'t10',l:'10 ans'},{v:'t15',l:'15 ans'}];
+  if (age >= 66) return [{v:'t10',l:'10 ans'},{v:'t15',l:'15 ans'}];
   if (age >= 61) return [{v:'t10',l:'10 ans'},{v:'t15',l:'15 ans'},{v:'t20',l:'20 ans'}];
   return [{v:'t10',l:'10 ans'},{v:'t15',l:'15 ans'},{v:'t20',l:'20 ans'},{v:'t25',l:'25 ans'}];
 }
