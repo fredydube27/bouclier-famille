@@ -1649,7 +1649,7 @@ function selectOpt(el) {
 let wizStep = 1;
 const TOTAL = 5;
 const ws = { type:null, prenom:'', nom:'', age:40, sexe:null,
-             fumeur:null, sante:null, sante_detail:'', montant:null, duree:null,
+             fumeur:null, sante:null, sante_detail:'', montant:null, montant_label:'', duree:null,
              email:'', telephone:'', ville:'' };
 
 // ── Pricing tables ────────────────────────────────────────────
@@ -1751,12 +1751,15 @@ function setupStep3() {
   const mPills = document.getElementById('montant-pills');
   mPills.innerHTML = '';
   const tempAmt = [
-    {v:100000,l:'100 000 $'},{v:150000,l:'150 000 $'},{v:250000,l:'250 000 $'},
-    {v:500000,l:'500 000 $'},{v:750000,l:'750 000 $'},{v:1000000,l:'1 000 000 $'}
+    {v:175000, l:'100 000 $ à 249 999 $'},
+    {v:375000, l:'250 000 $ à 499 999 $'},
+    {v:500000, l:'500 000 $ et plus'}
   ];
   const permAmt = [
-    {v:25000,l:'25 000 $'},{v:50000,l:'50 000 $'},
-    {v:100000,l:'100 000 $'},{v:250000,l:'250 000 $'}
+    {v:25000,  l:'25 000 $'},
+    {v:50000,  l:'50 000 $'},
+    {v:100000, l:'100 000 $'},
+    {v:250000, l:'250 000 $ et plus'}
   ];
   (type === 'permanent' ? permAmt : tempAmt).forEach(a => {
     const d = document.createElement('div');
@@ -1764,7 +1767,7 @@ function setupStep3() {
     d.dataset.val = a.v; d.textContent = a.l;
     d.onclick = () => {
       mPills.querySelectorAll('.wiz-pill').forEach(p => p.classList.remove('selected'));
-      d.classList.add('selected'); ws.montant = a.v; updatePreview();
+      d.classList.add('selected'); ws.montant = a.v; ws.montant_label = a.l; updatePreview();
     };
     mPills.appendChild(d);
   });
@@ -1845,7 +1848,7 @@ function submitFormspree() {
       Santé:            ws.sante,
       'Détails santé':  ws.sante_detail || '—',
       'Type assurance': typeMap[ws.type] || ws.type,
-      Couverture:       ws.montant ? fmt(ws.montant) : 'À déterminer',
+      Couverture:       ws.montant_label || (ws.montant ? fmt(ws.montant) : 'À déterminer'),
       Durée:            ws.duree ? durMap[ws.duree] : (ws.type === 'permanent' ? 'T100' : 'À déterminer'),
       'Prime estimée':  p ? p+' $/mois' : 'À calculer',
     })
